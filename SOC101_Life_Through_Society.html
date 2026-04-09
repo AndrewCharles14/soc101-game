@@ -1,0 +1,1116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOC101: Life Through Society</title>
+  <style>
+    /* ── CSS Custom Properties ── */
+    :root {
+      --bg:         #0f172a;
+      --surface:    #1e293b;
+      --surface2:   #334155;
+      --primary:    #6366f1;
+      --primary-h:  #818cf8;
+      --accent:     #f59e0b;
+      --text:       #f1f5f9;
+      --muted:      #94a3b8;
+      --success:    #22c55e;
+      --danger:     #ef4444;
+      --border:     #475569;
+      --radius:     12px;
+    }
+
+    /* ── Reduce Motion ── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+      line-height: 1.65;
+      min-height: 100vh;
+    }
+
+    /* ── Skip link ── */
+    .skip-link {
+      position: absolute; top: -100%; left: 0;
+      background: var(--accent); color: #000;
+      padding: .5rem 1rem; font-weight: 700;
+      z-index: 9999; text-decoration: none;
+    }
+    .skip-link:focus { top: 0; }
+
+    /* ── Focus ── */
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 3px;
+      border-radius: 4px;
+    }
+
+    /* ── Screen management ── */
+    .screen { display: none; max-width: 820px; margin: 0 auto; padding: 1.5rem; }
+    .screen.active { display: block; }
+
+    /* ── Typography ── */
+    h1 { font-size: clamp(1.75rem, 5vw, 2.6rem); font-weight: 800; line-height: 1.2; margin-bottom: .5rem; }
+    h2 { font-size: clamp(1.2rem, 3.5vw, 1.6rem); font-weight: 700; margin-bottom: .6rem; }
+    h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: .4rem; }
+    p  { margin-bottom: .75rem; }
+    p:last-child { margin-bottom: 0; }
+    ul, ol { padding-left: 1.4rem; }
+    li { margin-bottom: .35rem; }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem;
+      margin-bottom: 1rem;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+      padding: .75rem 1.5rem;
+      border: 2px solid transparent; border-radius: 8px;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      text-decoration: none;
+      transition: background .15s, transform .1s;
+      min-height: 48px; min-width: 120px;
+    }
+    .btn:active { transform: scale(.97); }
+    .btn-primary  { background: var(--primary);  color: #fff; border-color: var(--primary); }
+    .btn-primary:hover  { background: var(--primary-h); border-color: var(--primary-h); }
+    .btn-secondary { background: transparent; color: var(--text); border-color: var(--border); }
+    .btn-secondary:hover { background: var(--surface2); }
+
+    /* choice buttons */
+    .btn-choice {
+      background: var(--surface2); color: var(--text);
+      border: 2px solid var(--border); border-radius: 8px;
+      padding: 1rem 1.2rem; width: 100%; text-align: left;
+      font-size: .95rem; cursor: pointer;
+      margin-bottom: .75rem;
+      display: flex; align-items: flex-start; gap: .75rem;
+      min-height: 56px;
+      transition: border-color .15s, background .15s;
+    }
+    .btn-choice:hover:not(:disabled) { border-color: var(--primary); background: rgba(99,102,241,.1); }
+    .btn-choice:disabled { opacity: .6; cursor: not-allowed; }
+    .btn-choice.selected { border-color: var(--primary); background: rgba(99,102,241,.18); }
+
+    /* ── Button row ── */
+    .btn-row { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: 1.25rem; }
+
+    /* ── Profile grid ── */
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 1rem; margin: 1rem 0;
+    }
+    .profile-card {
+      background: var(--surface2); border: 2px solid var(--border);
+      border-radius: var(--radius); padding: 1.2rem; cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .profile-card:hover  { border-color: var(--primary); }
+    .profile-card.selected { border-color: var(--accent); background: rgba(245,158,11,.1); }
+    .profile-icon { font-size: 2rem; display: block; margin-bottom: .4rem; }
+
+    /* ── Progress ── */
+    .progress-wrap { margin-bottom: 1.2rem; }
+    .progress-labels { display: flex; justify-content: space-between; font-size: .85rem; color: var(--muted); margin-bottom: .3rem; }
+    .progress-track { height: 8px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .progress-fill  { height: 100%; background: var(--primary); border-radius: 4px; transition: width .35s ease; }
+
+    /* ── Score grid ── */
+    .scores-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: .6rem; margin-bottom: 1rem;
+    }
+    .score-item { background: var(--surface2); border-radius: 8px; padding: .65rem .5rem; text-align: center; }
+    .score-lbl  { font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); }
+    .score-val  { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+    .score-bar  { height: 4px; background: var(--surface); border-radius: 2px; margin-top: .3rem; overflow: hidden; }
+    .score-bar-fill { height: 100%; background: var(--accent); transition: width .4s ease; }
+
+    @keyframes pulse { 0%{transform:scale(1)} 50%{transform:scale(1.18)} 100%{transform:scale(1)} }
+    .score-val.bump { animation: pulse .4s ease; }
+
+    /* ── Scenario ── */
+    .scenario-header { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: .8rem; }
+    .scenario-emoji  { font-size: 2.5rem; flex-shrink: 0; }
+    .round-badge {
+      display: inline-block; background: var(--primary); color: #fff;
+      font-size: .72rem; font-weight: 700; padding: .18rem .65rem;
+      border-radius: 4px; margin-bottom: .35rem;
+      text-transform: uppercase; letter-spacing: .05em;
+    }
+
+    /* ── Feedback box ── */
+    .feedback-box {
+      background: rgba(99,102,241,.12);
+      border: 1px solid var(--primary);
+      border-radius: var(--radius); padding: 1.2rem; margin: 1rem 0;
+    }
+    .feedback-box h3 { color: var(--primary-h); }
+
+    .score-changes { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .6rem; }
+    .score-chg {
+      display: inline-flex; align-items: center; gap: .25rem;
+      font-size: .85rem; font-weight: 600;
+      padding: .22rem .55rem; border-radius: 4px;
+    }
+    .score-chg.pos { background: rgba(34,197,94,.15); color: #86efac; border: 1px solid rgba(34,197,94,.3); }
+    .score-chg.neg { background: rgba(239,68,68,.15);  color: #fca5a5; border: 1px solid rgba(239,68,68,.3); }
+
+    /* ── Concept tags ── */
+    .concept-tag {
+      display: inline-block; background: var(--accent); color: #000;
+      font-size: .7rem; font-weight: 700;
+      padding: .18rem .55rem; border-radius: 4px;
+      margin: .2rem .2rem 0 0; text-transform: uppercase; letter-spacing: .04em;
+    }
+
+    /* ── Results bars ── */
+    .result-bar-wrap { margin-bottom: .9rem; }
+    .result-bar-labels { display: flex; justify-content: space-between; margin-bottom: .25rem; font-weight: 600; font-size: .95rem; }
+    .result-bar  { height: 22px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .result-bar-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
+    .rb-opportunity { background: #6366f1; }
+    .rb-health      { background: #22c55e; }
+    .rb-stability   { background: #f59e0b; }
+    .rb-belonging   { background: #ec4899; }
+    .rb-resources   { background: #06b6d4; }
+
+    /* ── Reflection list ── */
+    .reflection-list { list-style: none; counter-reset: rc; }
+    .reflection-list li {
+      counter-increment: rc; padding: 1rem 1rem 1rem 3rem; position: relative;
+      border-left: 3px solid var(--primary); margin-bottom: .75rem;
+      background: var(--surface2); border-radius: 0 8px 8px 0;
+    }
+    .reflection-list li::before {
+      content: counter(rc); position: absolute; left: .75rem; top: 1rem;
+      font-weight: 700; color: var(--primary-h); font-size: 1.1rem;
+    }
+
+    /* ── Details/summary ── */
+    details {
+      background: var(--surface2); border: 1px solid var(--border);
+      border-radius: var(--radius); margin-bottom: 1rem;
+    }
+    summary {
+      padding: 1rem 1.25rem; cursor: pointer; font-weight: 600;
+      list-style: none; display: flex; align-items: center; gap: .5rem;
+    }
+    summary::-webkit-details-marker { display: none; }
+    summary::before { content: "▶"; font-size: .72rem; transition: transform .2s; }
+    details[open] summary::before { transform: rotate(90deg); }
+    .details-body { padding: 0 1.25rem 1.25rem; }
+
+    /* ── Hero (title screen) ── */
+    .hero { text-align: center; padding: 3rem 1rem 2rem; }
+    .hero-icon { font-size: 4rem; display: block; margin-bottom: .75rem; }
+    .subtitle { color: var(--muted); font-size: 1.05rem; margin-bottom: 1.75rem; }
+
+    /* ── Sample turn box ── */
+    .sample-box {
+      background: rgba(245,158,11,.08);
+      border: 2px dashed var(--accent);
+      border-radius: var(--radius); padding: 1.2rem; margin-top: 1rem;
+    }
+
+    /* ── Utility ── */
+    .text-muted  { color: var(--muted); font-size: .9rem; }
+    .text-center { text-align: center; }
+    .mt-1 { margin-top: .5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .mt-3 { margin-top: 1.5rem; }
+    .mb-1 { margin-bottom: .5rem; }
+    .mb-2 { margin-bottom: 1rem; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 1.4rem 0; }
+
+    /* ── SR-only ── */
+    .sr-only {
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 560px) {
+      .screen { padding: 1rem; }
+      .scores-grid { grid-template-columns: repeat(3, 1fr); }
+      .profile-grid { grid-template-columns: 1fr; }
+      .btn-row { flex-direction: column; }
+      .btn { width: 100%; }
+    }
+    @media (max-width: 360px) {
+      .scores-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to main content</a>
+<!-- Live region for screen readers -->
+<div id="sr-live" aria-live="polite" aria-atomic="true" class="sr-only"></div>
+
+<main id="main">
+
+  <!-- ════════════════════════════════════════════
+       SCREEN 1 — TITLE
+  ════════════════════════════════════════════ -->
+  <section id="screen-title" class="screen active" aria-labelledby="title-h1">
+
+    <div class="hero">
+      <span class="hero-icon" role="img" aria-label="Globe">🌐</span>
+      <h1 id="title-h1">SOC101: Life Through Society</h1>
+      <p class="subtitle">A scenario-based game about social structures, identity, and inequality</p>
+
+      <div class="btn-row" style="justify-content:center">
+        <button class="btn btn-primary" onclick="showScreen('screen-instructions')">▶ Start Game</button>
+        <button class="btn btn-secondary" onclick="toggleSample()" id="sample-btn"
+                aria-expanded="false" aria-controls="sample-section">📋 Sample Turn</button>
+      </div>
+
+      <div id="sample-section" hidden aria-live="polite">
+        <div class="sample-box mt-2" role="region" aria-label="Sample turn walkthrough">
+          <h2>📋 Sample Turn</h2>
+          <p><strong>Scenario:</strong> It's picture day. Your teacher says to wear something "appropriate for your gender." You don't like the suggested options.</p>
+          <p><strong>Choice A, go along with it:</strong> Belonging +5, Opportunity -5 (you feel unseen).</p>
+          <p><strong>Choice B, wear what you want:</strong> Opportunity +5, Belonging -5 (social cost for self-expression).</p>
+          <p><strong>Sociology Lesson:</strong> This illustrates <strong>gender socialization</strong>, which is how we learn society's expectations about dress and behavior based on perceived gender. Schools are one of the key agents of socialization.</p>
+          <p><em>Concepts tagged: Gender Socialization · Social Norms · Agents of Socialization</em></p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Assignment Info -->
+    <details>
+      <summary>📚 Assignment Info &amp; Purpose</summary>
+      <div class="details-body">
+        <p><strong>Purpose:</strong> Apply SOC101 concepts like health inequality, gender socialization, and structural inequality to realistic life scenarios.</p>
+        <p><strong>Players:</strong> 1 player at a time. Easy to pass around for group play.</p>
+        <p><strong>How to Start:</strong> Click "Start Game," read instructions, choose a social profile, and play 5 rounds.</p>
+        <p><strong>How a Turn Works:</strong> Read a short scenario → choose from 2–4 options → see the consequence + a sociology explanation → scores update.</p>
+        <p><strong>How Points Work:</strong> Decisions adjust 5 categories: Opportunity, Health, Stability, Belonging, and Resources. There is no single winning score. The goal is to notice how social forces shape outcomes.</p>
+        <p><strong>How the Game Ends:</strong> After Round 5 you see a results summary and four reflection questions for class discussion.</p>
+      </div>
+    </details>
+
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       SCREEN 2 — INSTRUCTIONS
+  ════════════════════════════════════════════ -->
+  <section id="screen-instructions" class="screen" aria-labelledby="instr-h1" aria-hidden="true">
+    <h1 id="instr-h1">How to Play</h1>
+
+    <div class="card">
+      <h2>🎯 Goal</h2>
+      <p>Navigate 5 life scenarios shaped by social structures, identity, and institutions. Your choices affect 5 score categories. At the end, reflect on how society, not just personal choices, shaped your outcome.</p>
+    </div>
+
+    <div class="card">
+      <h2>📊 Score Categories</h2>
+      <ul style="list-style:none;padding:0">
+        <li style="margin-bottom:.5rem"><strong style="color:#818cf8">🎓 Opportunity</strong>: Access to education, advancement, and choices</li>
+        <li style="margin-bottom:.5rem"><strong style="color:#22c55e">❤️ Health</strong>: Wellbeing and healthcare access</li>
+        <li style="margin-bottom:.5rem"><strong style="color:#f59e0b">🏠 Stability</strong>: Economic security and safety nets</li>
+        <li style="margin-bottom:.5rem"><strong style="color:#ec4899">🤝 Belonging</strong>: Community, identity affirmation, social support</li>
+        <li>                             <strong style="color:#06b6d4">💰 Resources</strong>: Income, assets, and material access</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>🗺️ The 5 Rounds</h2>
+      <ol>
+        <li><strong>Round 1:</strong> Childhood &amp; Gender Socialization</li>
+        <li><strong>Round 2:</strong> School, Peers &amp; Identity</li>
+        <li><strong>Round 3:</strong> Work, Insurance &amp; Inequality</li>
+        <li><strong>Round 4:</strong> Health Crisis &amp; Healthcare Access</li>
+        <li><strong>Round 5:</strong> Adulthood, Belonging, and Identity</li>
+      </ol>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary"   onclick="showScreen('screen-profile')">Choose Your Profile →</button>
+      <button class="btn btn-secondary" onclick="showScreen('screen-title')">← Back</button>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       SCREEN 3 — PROFILE SELECTION
+  ════════════════════════════════════════════ -->
+  <section id="screen-profile" class="screen" aria-labelledby="profile-h1" aria-hidden="true">
+    <h1 id="profile-h1">Choose Your Starting Profile</h1>
+    <p>Your starting point reflects the reality that people begin life in different social positions. This is about <strong>social structure</strong>, not personal worth.</p>
+    <p class="text-muted mt-1">Select one profile. It influences which barriers and opportunities appear in later rounds.</p>
+
+    <div class="profile-grid" id="profile-grid" role="group" aria-label="Social starting profiles"></div>
+
+    <div id="profile-feedback" aria-live="polite" class="mt-1 text-muted"></div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary"   id="begin-btn" onclick="startGame()" disabled aria-disabled="true">Begin Game →</button>
+      <button class="btn btn-secondary" onclick="showScreen('screen-instructions')">← Back</button>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       SCREEN 4 — GAME
+  ════════════════════════════════════════════ -->
+  <section id="screen-game" class="screen" aria-labelledby="game-h2" aria-hidden="true">
+
+    <!-- Progress bar -->
+    <div class="progress-wrap" role="region" aria-label="Game progress">
+      <div class="progress-labels">
+        <span id="prog-text">Round 1 of 5</span>
+        <span id="prog-pct">0%</span>
+      </div>
+      <div class="progress-track" role="progressbar"
+           aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Game progress">
+        <div class="progress-fill" id="prog-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Score display -->
+    <div class="scores-grid" role="region" aria-label="Current scores">
+      <div class="score-item">
+        <div class="score-lbl">🎓 Opportunity</div>
+        <div class="score-val" id="sv-opportunity">50</div>
+        <div class="score-bar"><div class="score-bar-fill" id="sb-opportunity" style="width:50%"></div></div>
+      </div>
+      <div class="score-item">
+        <div class="score-lbl">❤️ Health</div>
+        <div class="score-val" id="sv-health">50</div>
+        <div class="score-bar"><div class="score-bar-fill" id="sb-health" style="width:50%"></div></div>
+      </div>
+      <div class="score-item">
+        <div class="score-lbl">🏠 Stability</div>
+        <div class="score-val" id="sv-stability">50</div>
+        <div class="score-bar"><div class="score-bar-fill" id="sb-stability" style="width:50%"></div></div>
+      </div>
+      <div class="score-item">
+        <div class="score-lbl">🤝 Belonging</div>
+        <div class="score-val" id="sv-belonging">50</div>
+        <div class="score-bar"><div class="score-bar-fill" id="sb-belonging" style="width:50%"></div></div>
+      </div>
+      <div class="score-item">
+        <div class="score-lbl">💰 Resources</div>
+        <div class="score-val" id="sv-resources">50</div>
+        <div class="score-bar"><div class="score-bar-fill" id="sb-resources" style="width:50%"></div></div>
+      </div>
+    </div>
+
+    <hr>
+
+    <!-- Scenario text (populated by JS) -->
+    <div id="scenario-area"></div>
+
+    <!-- Choice buttons (populated by JS) -->
+    <div id="choices-area" role="group" aria-label="Your choices"></div>
+
+    <!-- Feedback after choice (populated by JS) -->
+    <div id="feedback-area" hidden></div>
+
+    <!-- Next button -->
+    <div class="btn-row" id="next-wrap" hidden>
+      <button class="btn btn-primary" id="next-btn" onclick="nextRound()">Next Round →</button>
+    </div>
+
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       SCREEN 5 — RESULTS
+  ════════════════════════════════════════════ -->
+  <section id="screen-results" class="screen" aria-labelledby="results-h1" aria-hidden="true">
+    <h1 id="results-h1">Your Results</h1>
+    <p id="results-subtitle" class="text-muted mb-2"></p>
+
+    <div class="card" id="results-bars-card"></div>
+    <div class="card" id="results-narrative-card"></div>
+
+    <div class="card">
+      <h2>🧠 Sociology Concepts You Encountered</h2>
+      <div id="concepts-list"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary"   onclick="showScreen('screen-reflection')">Discussion Questions →</button>
+      <button class="btn btn-secondary" onclick="restartGame()">↩ Play Again</button>
+    </div>
+  </section>
+
+
+  <!-- ════════════════════════════════════════════
+       SCREEN 6 — REFLECTION
+  ════════════════════════════════════════════ -->
+  <section id="screen-reflection" class="screen" aria-labelledby="reflect-h1" aria-hidden="true">
+    <h1 id="reflect-h1">Reflection &amp; Discussion</h1>
+    <p class="text-muted mb-2">Use these for class discussion, a journal entry, or a group debrief.</p>
+
+    <ol class="reflection-list" aria-label="Discussion questions">
+      <li>Looking back at your choices, which ones felt like real personal decisions and which ones felt more like the situation was already set up against you or for you before you even picked anything?</li>
+      <li>How did the profile you started with shape what happened to you? Would the same choices have led to different outcomes for a different profile?</li>
+      <li>Pick one round that felt the most realistic to you. What made it feel that way, and what does it say about how society works?</li>
+      <li>How did gender norms, healthcare access, or inequality show up across the rounds? Can you connect any of it to things you have actually seen or experienced?</li>
+    </ol>
+
+    <div class="card mt-2">
+      <h2>📖 Key Concept Glossary</h2>
+      <p><strong>Gender Socialization:</strong> The process by which family, school, peers, and media teach us gender roles and expectations.</p>
+      <p><strong>Healthcare as a Social Institution:</strong> Access to care is shaped by income, insurance type, race, and geography, not just individual choices.</p>
+      <p><strong>Heteronormativity / Cisnormativity:</strong> Social assumptions that everyone is heterosexual and cisgender, which creates barriers for LGBTQ+ individuals.</p>
+      <p><strong>Conflict Theory:</strong> Capitalism and class inequality shape who gets what, including healthcare, education, and opportunity. Health becomes commodified.</p>
+      <p><strong>Functionalism &amp; the Sick Role (Talcott Parsons):</strong> Sickness is a socially sanctioned form of deviance with rights (rest, exemption from duties) and responsibilities (seek care, try to recover). The physician acts as gatekeeper.</p>
+      <p><strong>Agents of Socialization:</strong> Family, school, peer groups, and mass media all transmit social norms and expectations.</p>
+      <p><strong>Sex vs. Gender:</strong> Sex is biological and physiological. Gender is socially constructed and culturally variable. They are not interchangeable.</p>
+      <p><strong>ACA / Obamacare:</strong> The Affordable Care Act expanded insurance coverage to millions of previously uninsured Americans through marketplaces and Medicaid expansion.</p>
+      <p><strong>Socialized vs. Universal Healthcare:</strong> The UK's NHS is socialized, which means it is government owned and operated. Canada's system is universal, which means it is publicly funded but privately delivered. The U.S. is largely private but already has public programs like Medicare, Medicaid, CHIP, the VA, and the Indian Health Service.</p>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn btn-primary"   onclick="restartGame()">↩ Play Again</button>
+      <button class="btn btn-secondary" onclick="showScreen('screen-results')">← Back to Results</button>
+    </div>
+  </section>
+
+</main><!-- end #main -->
+
+<script>
+/* ============================================================
+   GAME DATA
+   To edit scenarios: find the SCENARIOS array below.
+   To edit profiles:  find the PROFILES array below.
+   To edit reflection questions: edit the HTML above.
+   ============================================================ */
+
+/* ── SOCIAL STARTING PROFILES ──────────────────────────────
+   startingScores offsets are added to the base of 50.
+   Keep values between -20 and +20 to avoid extreme starts.
+*/
+const PROFILES = [
+  {
+    id: "prof-a",
+    icon: "👧",
+    name: "Aaliyah",
+    tagline: "Suburban Family, Amherst NY",
+    desc: "Grew up in Amherst, right outside Buffalo. Both parents work full-time and she has had health insurance through her dad's job her whole life. Cisgender girl. The family owns their home and has been pretty stable financially.",
+    note: "Things have generally been comfortable, but gender expectations and social norms still come up a lot.",
+    start: { opportunity:10, health:10, stability:10, belonging:5, resources:10 }
+  },
+  {
+    id: "prof-b",
+    icon: "👦",
+    name: "Darius",
+    tagline: "East Side Buffalo, Working-Class Family",
+    desc: "Grew up on the East Side of Buffalo with his mom, who works in retail. No employer health insurance, so they have been on and off Medicaid depending on the year. Cisgender boy. Money has always been tight but the community on his block is close.",
+    note: "Income and healthcare access come up as real issues throughout the game.",
+    start: { opportunity:-5, health:0, stability:-10, belonging:5, resources:-10 }
+  },
+  {
+    id: "prof-c",
+    icon: "🧒",
+    name: "Jaylen",
+    tagline: "Niagara Falls, Raised by Grandparents",
+    desc: "Grew up in Niagara Falls with their grandparents after their parents were not able to be around. Does not really identify as a boy or a girl, which was confusing for a lot of people in a small town. The nearest hospital growing up was over an hour away and money was always a concern.",
+    note: "Geography, income, and gender identity all shape what options feel available.",
+    start: { opportunity:-10, health:-10, stability:-10, belonging:-5, resources:-15 }
+  },
+  {
+    id: "prof-d",
+    icon: "🧑",
+    name: "Priya",
+    tagline: "First-Gen Indian American, South Buffalo",
+    desc: "Grew up in South Buffalo with parents who immigrated from India and work long hours to stay afloat. Cisgender girl. Her family buys their own insurance since neither parent has an employer plan. They have a really strong extended family and cultural community nearby.",
+    note: "Family support and a strong sense of community are real strengths, but insurance and financial pressure are constant.",
+    start: { opportunity:0, health:5, stability:-5, belonging:10, resources:-5 }
+  }
+];
+
+/* ── SCENARIOS ──────────────────────────────────────────────
+   Each scenario object:
+     round        — number 1–5
+     roundTheme   — display string
+     icon         — emoji
+     title        — scenario title
+     setup        — the life-situation paragraph shown to the player
+     choices[]    — array of choice objects:
+       label          — short button text
+       consequence    — what happens (1–2 sentences)
+       scores         — { opportunity, health, stability, belonging, resources }
+                        positive = increase, negative = decrease
+       explain        — sociology explanation (2–4 sentences)
+       concepts[]     — concept tag strings
+*/
+const SCENARIOS = [
+
+  /* ── ROUND 1: Childhood & Gender Socialization ── */
+  {
+    round: 1,
+    roundTheme: "Childhood & Gender Socialization",
+    icon: "🧸",
+    title: "Growing Up: The Toy Aisle and What It Meant",
+    setup: "You are 7 years old. Your birthday just passed and your relatives all bought you gifts based on what they assumed about your gender. You got a toy kitchen set and some dolls. You really wanted building blocks and a science kit. When you bring it up, one of your uncles laughs and says something like, 'That stuff is not really for you.' Your parents just kind of shrug it off.",
+    choices: [
+      {
+        label: "Say nothing and just go along with it.",
+        consequence: "Everyone seems happy at the party. You feel a little off but you do not want to make things awkward.",
+        scores: { opportunity:-5, health:0, stability:5, belonging:5, resources:0 },
+        explain: "Gender socialization starts really early, and a lot of it happens through small moments like this one. When families give kids gender-typed toys, they are reinforcing the idea that certain interests belong to certain genders. This is part of how the gender binary gets passed down without anyone really thinking about it. Family is one of the biggest agents of socialization, meaning it shapes how we understand ourselves and the world.",
+        concepts: ["Gender Socialization","Gender Binary","Agents of Socialization (Family)","Social Norms"]
+      },
+      {
+        label: "Speak up and ask if you can exchange the gifts.",
+        consequence: "Your uncle calls you difficult, but your mom eventually takes you to swap the gifts. You feel better about it later.",
+        scores: { opportunity:10, health:5, stability:-5, belonging:-5, resources:0 },
+        explain: "Pushing back on gender expectations is a form of resisting social scripts, which are basically the unwritten rules about how people are supposed to act based on their gender. When kids do this it usually comes with some kind of social cost, especially when it puts them at odds with family. Sociologists point out that agency, the ability to make your own choices, is always in tension with the social structures around you.",
+        concepts: ["Gender Scripts","Gender Expression","Gender Socialization","Social Norms","Agency vs. Structure"]
+      },
+      {
+        label: "Try out the gifts and actually end up enjoying them.",
+        consequence: "You end up having fun with some of the gifts. You feel curious and kind of surprised by yourself.",
+        scores: { opportunity:5, health:5, stability:5, belonging:5, resources:0 },
+        explain: "Not every kid who gets gender-typed toys feels limited by them, and that is valid too. The sociological concern is not really about the toys themselves but about the assumption that your gender should decide what you enjoy. Gender is socially constructed, which means society, not biology, is the one creating the categories of what is for boys and what is for girls.",
+        concepts: ["Gender as Socially Constructed","Gender Socialization","Social Norms"]
+      }
+    ]
+  },
+
+  /* ── ROUND 2: School, Peers & Identity ── */
+  {
+    round: 2,
+    roundTheme: "School, Peers & Identity",
+    icon: "🏫",
+    title: "First Semester at UB: Finding Your Place",
+    setup: "It is your first semester at the University at Buffalo. You are trying to figure out your major and your advisor keeps steering you toward programs that feel like they match gender expectations more than your actual interests. On top of that, you notice certain spaces on campus, like study lounges, club fairs, and even some classrooms, feel more comfortable for some students than others. A classmate who is nonbinary tells you they feel invisible in a lot of spaces. You are still figuring out where you fit.",
+    choices: [
+      {
+        label: "Go with whatever your advisor recommends to avoid the hassle.",
+        consequence: "You pick the suggested major. It is fine but you feel kind of checked out in your classes.",
+        scores: { opportunity:-10, health:-5, stability:5, belonging:0, resources:0 },
+        explain: "Academic advisors and teachers can reproduce gender stereotypes through how they guide students, even without meaning to. When advisors push students toward certain programs based on their gender it is a form of institutional discrimination, meaning the system itself is producing unequal outcomes even if no one is being intentionally unfair. This is exactly what sociologists mean when they say schools are agents of socialization.",
+        concepts: ["Institutional Discrimination","Agents of Socialization (School)","Gender Socialization","Stereotypes","Sexism"]
+      },
+      {
+        label: "Push back and enroll in the major you actually want.",
+        consequence: "Your advisor seems skeptical but agrees. Some classmates treat you differently but you feel way more motivated.",
+        scores: { opportunity:15, health:5, stability:0, belonging:-5, resources:0 },
+        explain: "Advocating for yourself within institutions takes real effort and usually comes with some kind of social cost. Schools and universities are not neutral spaces, they reflect the same power structures that exist in the broader society. The experience of pushing back tends to be harder depending on your identity, which is what intersectionality helps us understand.",
+        concepts: ["Agents of Socialization (School)","Intersectionality","Gender Inequality","Social Institutions","Agency vs. Structure"]
+      },
+      {
+        label: "Connect with other students who are dealing with the same thing and speak up together.",
+        consequence: "You find a group of students who get it. UB does not change much right away but you feel way less alone.",
+        scores: { opportunity:10, health:5, stability:0, belonging:15, resources:0 },
+        explain: "Even small acts of collective action can matter. Gender inequality in universities is not just an individual problem, it is tied to larger patterns of sexism in education. When students push back together they are addressing a public issue, not just a personal frustration. That connection between individual experience and bigger social patterns is something that shows up a lot in sociology.",
+        concepts: ["Collective Action","Gender Inequality","Social Change","Sexism","Agents of Socialization (School)"]
+      }
+    ]
+  },
+
+  /* ── ROUND 3: Work, Insurance & Inequality ── */
+  {
+    round: 3,
+    roundTheme: "Work, Insurance & Inequality",
+    icon: "💼",
+    title: "After Graduation: The Insurance Problem",
+    setup: "You just graduated from UB and landed a job at a small business in the Elmwood Village area of Buffalo. The pay is okay but there is no health insurance included. Your old roommate is doing gig work through delivery apps and making decent money but also has no coverage. You have a health condition that requires a prescription every month and without insurance it costs around $180 each time.",
+    choices: [
+      {
+        label: "Take the job and just pay out of pocket and hope nothing goes wrong.",
+        consequence: "You have a steady paycheck but one month you skip your medication because rent was due. It catches up with you.",
+        scores: { opportunity:5, health:-10, stability:10, belonging:0, resources:-5 },
+        explain: "Most Americans get health insurance through their employer, which creates a huge gap for people working at small businesses, doing gig work, or working part time. Going without coverage is not really a personal choice as much as it is a result of how the system is set up. The Affordable Care Act, sometimes called the ACA or Obamacare, tried to fix some of this by expanding coverage to millions of people, but gaps still exist especially in states that did not expand Medicaid.",
+        concepts: ["Employment-Based Insurance","Uninsured / Underinsured","ACA / Obamacare","Healthcare as a Social Institution","Preventive Care vs. Urgent Care"]
+      },
+      {
+        label: "Look into Medicaid or ACA plans before you decide anything.",
+        consequence: "Based on your income you qualify for a subsidized ACA plan. You get coverage for a manageable monthly cost.",
+        scores: { opportunity:10, health:15, stability:5, belonging:0, resources:-5 },
+        explain: "A lot of people do not realize they qualify for Medicaid or ACA subsidies. Medicaid covers low-income individuals and the ACA marketplace offers plans with financial help based on income. These programs are examples of the government playing a role in healthcare as a social institution. From a conflict theory perspective, critics would say these programs still fall short because they leave too many people out and still operate within a profit-driven system.",
+        concepts: ["Medicaid","ACA / Obamacare","Public vs. Private Healthcare","Conflict Theory","Pre-existing Conditions","Healthcare Costs"]
+      },
+      {
+        label: "Do the gig work and buy your own insurance plan directly.",
+        consequence: "You have coverage but the monthly premium eats up a big chunk of your income and you are stressed about money constantly.",
+        scores: { opportunity:0, health:10, stability:-15, belonging:0, resources:-10 },
+        explain: "Buying insurance on your own without an employer or government program is called direct-purchase insurance and it is usually really expensive. This is one of the clearest ways to see how the U.S. system differs from others. In Great Britain the National Health Service is government-owned and available to everyone no matter where you work. Conflict theorists argue the U.S. approach treats health like a product you have to afford rather than something everyone should have access to.",
+        concepts: ["Direct-Purchase Insurance","Commodification of Health","Socialized Medicine (UK NHS)","Universal Healthcare (Canada)","Conflict Theory","Healthcare Costs"]
+      }
+    ]
+  },
+
+  /* ── ROUND 4: Health Crisis & Healthcare Access ── */
+  {
+    round: 4,
+    roundTheme: "Health Crisis & Healthcare Access",
+    icon: "🏥",
+    title: "Something Is Wrong: Where Do You Go?",
+    setup: "You have been ignoring a nagging cough and feeling run down for weeks because you were busy and worried about the cost of going to a doctor. Now you wake up with a fever and tightness in your chest. You are near UB's South Campus and there is a UBMD urgent care clinic nearby. Buffalo General is a few miles away. There is also a community health center that serves people without insurance, but they told you there is a two-week wait last time you called.",
+    choices: [
+      {
+        label: "Go to the Buffalo General ER right now.",
+        consequence: "You get seen quickly. But the bill is massive and without enough coverage you end up in medical debt.",
+        scores: { opportunity:-5, health:15, stability:-15, belonging:0, resources:-15 },
+        explain: "For a lot of people in the U.S. the emergency room is the only real option when something goes wrong, especially if they are uninsured or underinsured. This is the difference between urgent care and preventive care. Preventive care, like seeing a doctor regularly and catching problems early, is way cheaper in the long run but it requires consistent access. Medical debt is one of the leading causes of bankruptcy in the country, which is a public issue rooted in policy, not just bad luck.",
+        concepts: ["Preventive Care vs. Urgent Care","Healthcare Costs","Uninsured","Healthcare as a Social Institution","Health Disparities (Class)"]
+      },
+      {
+        label: "Try the UBMD urgent care clinic or call a telehealth service.",
+        consequence: "UBMD has a wait too but shorter than the community clinic. You get seen but your condition got worse from waiting.",
+        scores: { opportunity:0, health:-5, stability:5, belonging:5, resources:5 },
+        explain: "Urgent care clinics like UBMD are more accessible than the ER but they still depend on insurance or your ability to pay. Community health centers serve uninsured and low-income patients but they are often overwhelmed. This is a good example of how healthcare access is unequal even within the same city. Conflict theorists point out that where you live and how much money you have shapes whether you get timely care.",
+        concepts: ["Healthcare Access","Global Inequality in Healthcare","Conflict Theory","Health Disparities (Class, Race)","Underinsured"]
+      },
+      {
+        label: "Check if you qualify for the VA or Indian Health Service before doing anything.",
+        consequence: "If you qualify, you get covered care with no bill. These programs are solid but only available to specific groups.",
+        scores: { opportunity:5, health:15, stability:10, belonging:10, resources:5 },
+        explain: "The U.S. actually runs several government health programs already. The Veterans Health Administration covers military veterans. The Indian Health Service covers Native American and Alaska Native people. Medicaid covers low-income individuals. Medicare covers people over 65. CHIP covers children. These programs show that the U.S. has been providing government-run healthcare to specific groups for a long time, even while the broader system stays private.",
+        concepts: ["Veterans Health Administration","Indian Health Service","Medicare","Medicaid","CHIP","Public vs. Private Healthcare"]
+      },
+      {
+        label: "Rely on family or try some home remedies first to see if it passes.",
+        consequence: "Some things help with the symptoms but you eventually have to see a doctor when it gets worse.",
+        scores: { opportunity:0, health:-5, stability:5, belonging:10, resources:5 },
+        explain: "A lot of people, especially those without easy access to conventional medicine, turn to family support or traditional remedies first. Sociologists who study health look at how cultural background, cost, and distrust of the medical system all shape the choices people make. There is a real history of racism and mistreatment in American medicine that has given communities good reasons to be cautious, which connects to the idea of the doctor and patient power imbalance.",
+        concepts: ["Traditional vs. Complementary Medicine","Racism in Healthcare","Doctor/Patient Power Imbalance","Conflict Theory","Health Disparities (Race)"]
+      }
+    ]
+  },
+
+  /* ── ROUND 5: Adulthood, Belonging, Rights & Identity ── */
+  {
+    round: 5,
+    roundTheme: "Adulthood, Belonging, and Identity",
+    icon: "🌈",
+    title: "Campus Life, Identity, and What People Expect From You",
+    setup: "You are wrapping up your time at UB and reflecting on everything. A close friend from your sociology class tells you they are nonbinary and asks you to use different pronouns. Later that week a family member texts you asking what you think about all the gender stuff going on. You also find yourself thinking about how welcome you actually felt at UB over the past few years, whether in the Student Union, in your classes, at events, or in spaces like the LGBTQ Resource Center on campus.",
+    choices: [
+      {
+        label: "Be openly supportive of your friend and try to clear up your family member's misconceptions.",
+        consequence: "Your friend feels really seen. There is some awkwardness with your family member but you feel good about where you stood.",
+        scores: { opportunity:5, health:5, stability:-5, belonging:15, resources:0 },
+        explain: "Being a genuine ally means pushing back on heteronormativity, which is the assumption that everyone is straight, and cisnormativity, which is the assumption that everyone identifies with the gender they were assigned at birth. It also helps to know the basics, like the fact that being transgender is not the same as cross-dressing and is completely separate from being intersex. Gender dysphoria is the distress some trans people experience when their identity does not match how the world sees them. The language around all of this keeps evolving as more people share their experiences.",
+        concepts: ["Heteronormativity","Cisnormativity","Transgender (vs. Cross-dressing)","Gender Dysphoria","LGBTQ+ Allyship","Evolving Social Norms"]
+      },
+      {
+        label: "Support your friend in private but stay quiet around your family.",
+        consequence: "Your friend appreciates you reaching out. Nothing changes publicly but they feel a little less alone.",
+        scores: { opportunity:0, health:0, stability:5, belonging:5, resources:0 },
+        explain: "Private support is meaningful but staying silent in public keeps heteronormativity in place. Social norms shift when people see them being challenged, not just when people quietly disagree. Sexual orientation is a spectrum that includes identities like heterosexual, homosexual, bisexual, asexual, aromantic, demisexual, pansexual, omnisexual, and queer. Each of these identities has its own history and community, and the terminology keeps changing as people develop better ways to describe their experiences.",
+        concepts: ["Heteronormativity","Sexual Orientation Spectrum","LGBTQ+ Language","Social Change","Cisgender"]
+      },
+      {
+        label: "Get involved with student orgs or civic groups in Buffalo after graduation.",
+        consequence: "You find a community group near campus. It feels slow but your sense of purpose and belonging grow.",
+        scores: { opportunity:10, health:10, stability:0, belonging:20, resources:0 },
+        explain: "Getting involved in community life, whether through voting, organizing, or mutual aid, is one of the ways people contribute to changing the systems that affect everyone. Digital platforms and AI tools are also reshaping how communities organize and how power flows, creating both new opportunities and new inequalities at the same time.",
+        concepts: ["Civic Engagement","Structural Inequality","Digital Technology & Power","Social Movements","Social Change"]
+      },
+      {
+        label: "Realize you do not actually know as much about gender and sexuality as you thought.",
+        consequence: "You feel uncomfortable at first but then genuinely curious. You start doing some reading and your thinking shifts.",
+        scores: { opportunity:10, health:5, stability:0, belonging:10, resources:0 },
+        explain: "One of the most honest things a person can do is recognize the gaps in their own understanding. Sex refers to biological and physiological characteristics. Gender is socially constructed and varies across cultures, meaning the binary of just man and woman is not universal. Some cultures have always recognized third genders, like the Fa'afafine in Samoan culture. Sexual orientation and gender identity exist on a spectrum, and the vocabulary people use to describe themselves keeps changing as communities develop more precise language.",
+        concepts: ["Sex vs. Gender","Gender as Socially Constructed","Gender Fluidity","Third Gender / Fa'afafine","Sexual Orientation Spectrum","Terminology Evolves Over Time"]
+      }
+    ]
+  }
+
+]; /* end SCENARIOS */
+
+
+/* ============================================================
+   GAME STATE
+   ============================================================ */
+const state = {
+  profile:      null,
+  round:        0,       // 0-indexed into SCENARIOS
+  scores:       { opportunity:50, health:50, stability:50, belonging:50, resources:50 },
+  choices:      [],      // log of { round, title, label, concepts }
+  concepts:     new Set()
+};
+
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+function clamp(v, lo=0, hi=100) { return Math.max(lo, Math.min(hi, v)); }
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function announce(msg) {
+  const el = document.getElementById('sr-live');
+  el.textContent = '';
+  setTimeout(() => { el.textContent = msg; }, 60);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.classList.remove('active');
+    s.setAttribute('aria-hidden','true');
+  });
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.classList.add('active');
+  el.removeAttribute('aria-hidden');
+  const h = el.querySelector('h1');
+  if (h) { h.setAttribute('tabindex','-1'); h.focus(); }
+  announce('Navigated to ' + id.replace('screen-','').replace(/-/g,' '));
+}
+
+function toggleSample() {
+  const btn = document.getElementById('sample-btn');
+  const sec = document.getElementById('sample-section');
+  const open = sec.hidden;
+  sec.hidden = !open;
+  btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+
+
+/* ============================================================
+   PROFILES
+   ============================================================ */
+function renderProfiles() {
+  const grid = document.getElementById('profile-grid');
+  grid.innerHTML = '';
+  PROFILES.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'profile-card';
+    card.id = p.id;
+    card.setAttribute('role','button');
+    card.setAttribute('tabindex','0');
+    card.setAttribute('aria-pressed','false');
+    card.setAttribute('aria-label', `${p.name}: ${p.tagline}. ${p.desc}`);
+    card.innerHTML = `
+      <span class="profile-icon" role="img" aria-hidden="true">${p.icon}</span>
+      <h3>${p.name}</h3>
+      <p class="text-muted" style="font-size:.83rem;margin-bottom:.4rem">${p.tagline}</p>
+      <p style="font-size:.875rem">${p.desc}</p>
+      <p style="font-size:.8rem;color:#94a3b8;margin-top:.4rem;font-style:italic">${p.note}</p>
+    `;
+    const pick = () => selectProfile(p);
+    card.addEventListener('click', pick);
+    card.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); pick(); } });
+    grid.appendChild(card);
+  });
+}
+
+function selectProfile(p) {
+  document.querySelectorAll('.profile-card').forEach(c => {
+    c.classList.remove('selected');
+    c.setAttribute('aria-pressed','false');
+  });
+  document.getElementById(p.id).classList.add('selected');
+  document.getElementById(p.id).setAttribute('aria-pressed','true');
+  state.profile = p;
+
+  const btn = document.getElementById('begin-btn');
+  btn.disabled = false;
+  btn.removeAttribute('aria-disabled');
+
+  const offsets = Object.entries(p.start)
+    .filter(([,v]) => v !== 0)
+    .map(([k,v]) => `${k} ${v>0?'+':''}${v}`).join(', ') || 'neutral';
+
+  document.getElementById('profile-feedback').textContent =
+    `Selected: ${p.name} (${p.tagline}). Starting adjustments: ${offsets}.`;
+  announce(`Profile selected: ${p.name}`);
+}
+
+
+/* ============================================================
+   GAME INIT / RESTART
+   ============================================================ */
+function startGame() {
+  if (!state.profile) return;
+  const base = 50;
+  Object.keys(state.scores).forEach(k => {
+    state.scores[k] = clamp(base + (state.profile.start[k] || 0));
+  });
+  state.round    = 0;
+  state.choices  = [];
+  state.concepts = new Set();
+  updateScores();
+  showScreen('screen-game');
+  renderRound();
+}
+
+function restartGame() {
+  state.profile = null;
+  state.round   = 0;
+  state.choices = [];
+  state.concepts = new Set();
+  document.querySelectorAll('.profile-card').forEach(c => {
+    c.classList.remove('selected');
+    c.setAttribute('aria-pressed','false');
+  });
+  const btn = document.getElementById('begin-btn');
+  btn.disabled = true;
+  btn.setAttribute('aria-disabled','true');
+  document.getElementById('profile-feedback').textContent = '';
+  showScreen('screen-title');
+}
+
+
+/* ============================================================
+   ROUND RENDERING
+   ============================================================ */
+function renderRound() {
+  const sc = SCENARIOS[state.round];
+  if (!sc) { buildResults(); return; }
+
+  /* progress */
+  const pct = Math.round((state.round / SCENARIOS.length) * 100);
+  document.getElementById('prog-text').textContent =
+    `Round ${sc.round} of ${SCENARIOS.length}: ${sc.roundTheme}`;
+  document.getElementById('prog-pct').textContent = `${pct}%`;
+  const fill = document.getElementById('prog-fill');
+  fill.style.width = `${pct}%`;
+  fill.closest('[role=progressbar]').setAttribute('aria-valuenow', pct);
+
+  /* hide feedback / next */
+  document.getElementById('feedback-area').hidden = true;
+  document.getElementById('next-wrap').hidden = true;
+
+  /* scenario text */
+  document.getElementById('scenario-area').innerHTML = `
+    <div class="scenario-header">
+      <span class="scenario-emoji" role="img" aria-hidden="true">${sc.icon}</span>
+      <div>
+        <span class="round-badge">Round ${sc.round}: ${sc.roundTheme}</span>
+        <h2 id="game-h2">${sc.title}</h2>
+      </div>
+    </div>
+    <div class="card"><p>${sc.setup}</p></div>
+    <h3 style="margin-bottom:.5rem">What do you do?</h3>
+  `;
+
+  /* choices */
+  const box = document.getElementById('choices-area');
+  box.innerHTML = '';
+  sc.choices.forEach((ch, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-choice';
+    btn.setAttribute('aria-label', `Choice ${String.fromCharCode(65+i)}: ${ch.label}`);
+    btn.innerHTML = `
+      <span style="flex-shrink:0;font-weight:700;color:var(--accent)">${String.fromCharCode(65+i)}.</span>
+      <span>${ch.label}</span>
+    `;
+    btn.addEventListener('click', () => choose(i));
+    box.appendChild(btn);
+  });
+
+  announce(`Round ${sc.round}: ${sc.title}. ${sc.setup.slice(0,100)}… Choose your action.`);
+}
+
+
+/* ============================================================
+   CHOICE HANDLING
+   ============================================================ */
+function choose(idx) {
+  const sc  = SCENARIOS[state.round];
+  const ch  = sc.choices[idx];
+
+  /* disable all buttons, mark selected */
+  document.querySelectorAll('.btn-choice').forEach((b,i) => {
+    b.disabled = true;
+    if (i === idx) b.classList.add('selected');
+  });
+
+  /* apply scores */
+  const changes = [];
+  Object.entries(ch.scores).forEach(([k, delta]) => {
+    if (delta !== 0) {
+      state.scores[k] = clamp(state.scores[k] + delta);
+      changes.push({ k, delta });
+    }
+  });
+
+  /* track concepts */
+  ch.concepts.forEach(c => state.concepts.add(c));
+  state.choices.push({ round:sc.round, title:sc.title, label:ch.label, concepts:ch.concepts });
+
+  /* update score display */
+  updateScores(changes.map(c=>c.k));
+
+  /* show feedback */
+  showFeedback(ch, changes);
+
+  /* next button */
+  const isLast = state.round >= SCENARIOS.length - 1;
+  document.getElementById('next-btn').textContent = isLast ? 'See Results →' : 'Next Round →';
+  document.getElementById('next-wrap').hidden = false;
+  document.getElementById('next-btn').focus();
+
+  const changeText = changes.map(c=>`${c.k} ${c.delta>0?'increased':'decreased'} by ${Math.abs(c.delta)}`).join(', ');
+  announce(`You chose: ${ch.label}. ${ch.consequence} Score changes: ${changeText}.`);
+}
+
+function showFeedback(ch, changes) {
+  const chgsHTML = changes.map(c =>
+    `<span class="score-chg ${c.delta>0?'pos':'neg'}">${c.delta>0?'▲':'▼'} ${cap(c.k)} ${c.delta>0?'+':''}${c.delta}</span>`
+  ).join('');
+  const tagsHTML = ch.concepts.map(t => `<span class="concept-tag">${t}</span>`).join('');
+
+  const box = document.getElementById('feedback-area');
+  box.hidden = false;
+  box.innerHTML = `
+    <div class="feedback-box" role="region" aria-label="Consequence and sociology explanation">
+      <h3>What Happened</h3>
+      <p>${ch.consequence}</p>
+      <div class="score-changes" aria-label="Score changes">${chgsHTML}</div>
+      <hr style="margin:.75rem 0;border-color:rgba(99,102,241,.3)">
+      <h3>The Sociology</h3>
+      <p>${ch.explain}</p>
+      <div style="margin-top:.65rem">
+        <strong style="font-size:.75rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)">Concepts:</strong><br>
+        ${tagsHTML}
+      </div>
+    </div>
+  `;
+}
+
+function nextRound() {
+  state.round++;
+  if (state.round >= SCENARIOS.length) {
+    buildResults();
+  } else {
+    renderRound();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+}
+
+
+/* ============================================================
+   SCORE DISPLAY
+   ============================================================ */
+function updateScores(changedKeys = []) {
+  Object.entries(state.scores).forEach(([k, v]) => {
+    const valEl = document.getElementById(`sv-${k}`);
+    const barEl = document.getElementById(`sb-${k}`);
+    if (valEl) {
+      valEl.textContent = v;
+      if (changedKeys.includes(k)) {
+        valEl.classList.remove('bump');
+        void valEl.offsetWidth;
+        valEl.classList.add('bump');
+      }
+    }
+    if (barEl) barEl.style.width = `${v}%`;
+  });
+}
+
+
+/* ============================================================
+   RESULTS SCREEN
+   ============================================================ */
+const CAT_CONFIG = [
+  { k:'opportunity', label:'Opportunity', icon:'🎓', cls:'rb-opportunity' },
+  { k:'health',      label:'Health',      icon:'❤️', cls:'rb-health'      },
+  { k:'stability',   label:'Stability',   icon:'🏠', cls:'rb-stability'   },
+  { k:'belonging',   label:'Belonging',   icon:'🤝', cls:'rb-belonging'   },
+  { k:'resources',   label:'Resources',   icon:'💰', cls:'rb-resources'   }
+];
+
+function buildResults() {
+  showScreen('screen-results');
+
+  document.getElementById('results-subtitle').textContent =
+    `You played as ${state.profile.name} (${state.profile.tagline}) across 5 rounds of life.`;
+
+  /* bars */
+  const barsCard = document.getElementById('results-bars-card');
+  barsCard.innerHTML = '<h2>Your Final Scores</h2>';
+  CAT_CONFIG.forEach(cat => {
+    const v = state.scores[cat.k];
+    barsCard.innerHTML += `
+      <div class="result-bar-wrap">
+        <div class="result-bar-labels">
+          <span>${cat.icon} ${cat.label}</span><span>${v} / 100</span>
+        </div>
+        <div class="result-bar"
+             role="progressbar"
+             aria-valuenow="${v}" aria-valuemin="0" aria-valuemax="100"
+             aria-label="${cat.label}: ${v} out of 100">
+          <div class="result-bar-fill ${cat.cls}" style="width:${v}%"></div>
+        </div>
+      </div>
+    `;
+  });
+
+  /* narrative */
+  document.getElementById('results-narrative-card').innerHTML =
+    '<h2>What Your Results Mean</h2>' + buildNarrative();
+
+  /* concepts */
+  document.getElementById('concepts-list').innerHTML =
+    Array.from(state.concepts).map(c => `<span class="concept-tag">${c}</span>`).join(' ');
+}
+
+function buildNarrative() {
+  const s = state.scores;
+  const p = state.profile;
+  const parts = [];
+
+  if (s.resources >= 65 && s.belonging < 50)
+    parts.push(`<p>You built <strong>strong material resources</strong> but at some cost to community and belonging. Economic success does not automatically produce social connection, and sociologists have found that isolation has real effects on mental and physical health even when someone has money.</p>`);
+
+  if (s.belonging >= 65 && s.resources < 50)
+    parts.push(`<p>You have <strong>strong community belonging</strong> despite limited material resources. This is what sociologists call social capital, the networks and relationships people can draw on. It can buffer some of the harm that comes with economic inequality, though it can only do so much in the long run.</p>`);
+
+  if (s.health < 45)
+    parts.push(`<p>Your <strong>health score ended up lower</strong>, which reflects barriers to preventive care and healthcare access throughout the game. In a system where coverage depends on employment, income, or geography, health outcomes are often shaped less by individual choices than by which insurance program someone qualifies for, or whether they qualify at all.</p>`);
+
+  if (s.health >= 70)
+    parts.push(`<p>Your <strong>health score is strong</strong> and you navigated healthcare access pretty well. That reflects both your choices and the starting position of your profile. For many people, especially those who are uninsured or underinsured, these outcomes are harder to reach regardless of the effort they put in.</p>`);
+
+  if (s.stability < 45)
+    parts.push(`<p>Your <strong>stability ended up pretty fragile</strong>, shaped by things like employment uncertainty, healthcare costs, and the limits of the social safety net. Stability is not just about income, it is also about whether the institutions around you can keep a single hardship from turning into a much bigger crisis.</p>`);
+
+  if (s.opportunity < 45)
+    parts.push(`<p>Your <strong>opportunity score reflects limited access</strong> to advancement throughout the game, shaped by gender socialization, institutional barriers, and how your social position connected with the education and employment systems you moved through. Sociologists document how race, class, gender, and geography pile up to create very different starting points for different people.</p>`);
+
+  if (Object.values(p.start).some(v => v < 0))
+    parts.push(`<p>Your profile, <strong>${p.name} from ${p.tagline}</strong>, started with some real challenges built in. That mirrors how inequality actually works. Where you start shapes what feels available to you, and that is true regardless of how hard you work or what choices you make.</p>`);
+
+  if (parts.length === 0)
+    parts.push(`<p>Your path produced <strong>mixed outcomes</strong>, with some categories ending up stronger and others weaker. That reflects how different forces shape different parts of life. Healthcare policy shapes health. Gender norms shape opportunity. Class shapes stability. These things do not operate independently.</p>`);
+
+  parts.push(`<p style="margin-top:.75rem">The institutions you moved through in this game, schools, healthcare systems, employers, and family norms, are not random or personal. They are the kind of systems that sociologists study because they produce the same kinds of unequal outcomes over and over again across different groups of people.</p>`);
+
+  return parts.join('');
+}
+
+
+/* ============================================================
+   INIT
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', () => {
+  renderProfiles();
+  document.querySelectorAll('.screen:not(.active)').forEach(s =>
+    s.setAttribute('aria-hidden','true')
+  );
+});
+</script>
+</body>
+</html>
